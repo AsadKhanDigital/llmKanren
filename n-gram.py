@@ -22,6 +22,32 @@ def barliman_output(definition, test_cases):
 
         Write out 100 possible implementations of the function that satisfy the test cases by filling in the holes with appropriate Scheme code.
 
+        Only use the following subset of Scheme:
+
+        - 'define'
+        - 'letrec'
+        - 'lambda'
+        - 'if'
+        - 'symbol?'
+        - 'not'
+        - 'and'
+        - 'or'
+        - 'list'
+        - 'null?'
+        - 'pair?'
+        - 'car'
+        - 'cdr'
+        - 'cons'
+        - 'equal?'
+        - 'let'
+        - 'match'
+        - 'quote'
+        - function application
+
+        Do not use any other Scheme functions or special forms.
+
+        Please bias towards generating different answers but ensure correctness.
+
         Output only the function definitions. Do not include other text or formatting.
 
         Do not include the ```scheme formatting in your response.
@@ -182,14 +208,17 @@ if __name__ == "__main__":
     
     test_cases = \
         """
-        (concat '() '())
+        (f '() '())
         '()
 
-        (concat '(1 2 3) '(4 5 6))
+        (f '(1 2 3) '(4 5 6))
         '(1 2 3 4 5 6)
         """
-
+    
     output = barliman_output(definition, test_cases)
+
+    f = open('output.txt', 'w')
+    f.write(output)
 
     definitions = output.strip().split('\n\n')
 
