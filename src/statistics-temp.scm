@@ -1,1 +1,0 @@
-(((if null?) . 36) ((lambda if) . 36) ((lambda letrec) . 2) ((lambda let) . 1) ((let lambda) . 1) ((letrec lambda) . 38) ((null? var) . 36))

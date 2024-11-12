@@ -3,7 +3,7 @@
 ;; ngrams-statistics structure:
 ;;
 ;; (((context form) . count) ...)
-(define ngrams-statistics (read-data-from-file "tmp/statistics-temp.scm"))
+(define ngrams-statistics (read-data-from-file "tmp/statistics.scm"))
 
 (define unique
   (lambda (l)
@@ -12,7 +12,6 @@
       (cons (car l) (remove (car l) (unique (cdr l)))))))
 
 (define all-contexts (unique (map caar ngrams-statistics)))
-  ; only looks at the first elements
 
 ;; orderings-alist structure:
 ;;
@@ -20,12 +19,6 @@
 (define orderings-alist
   (let ((ordering-for-context
           (lambda (ctx)
-            ; suppose that ctx = 'cdr, then in statistics.scm rn we have ((cdr var) . 107) ((cdr cdr) . 3) ((cdr car) . 1)
-            ; then, ctx-stats = ((var . 107) (cdr . 3) (car . 1))
-            ; now, for the statistics.scm where there are 3 cases... this is a bit tricky :/ because we are gonna have something like
-            ; (cdr var app), (cdr var var)... do we create a nested structure, i.e.
-            ; (cdr (var (app . 30) (var . 2))
-            ; )... I feel like this makes the most sense, so let's do that
             (let ((ctx-stats (map (lambda (entry) (cons (cadar entry) (cdr entry)))
                                   (filter (lambda (entry) (equal? ctx (caar entry))) ngrams-statistics))))
               ;; ctx-stats has the structure:
@@ -39,11 +32,8 @@
                       (lambda (a b)
                         (> (alist-ref ctx-stats (car a) 0)
                            (alist-ref ctx-stats (car b) 0)))))
-                           
                 (map cdr (list-sort compare expert-ordering-alist)))))))
-    ; the final value returned here will be the list of evalos, where the ordering is first done w.r.t ctx-stats
-    ; and the remaining ordering follows the same ordering as expert-ordering-alist
-    (map (lambda (ctx) 
+    (map (lambda (ctx)
            (cons ctx (ordering-for-context ctx)))
          all-contexts)))
 

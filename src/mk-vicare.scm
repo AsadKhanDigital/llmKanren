@@ -18,6 +18,7 @@
 
 (define unshift (lambda (n i) (fx+ (fxsll n 1) i)))
 
+
 ;; Switched to N-way Trie implementation to reduce depth
 
 (define shift-size 4)
