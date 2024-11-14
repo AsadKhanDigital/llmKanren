@@ -4,5 +4,7 @@ import sys
 
 run_query = sys.argv[1]
 
+print(run_query)
+
 # Generate the corpus.scm file
-gen_corpus(run_query)
+# gen_corpus(run_query)
