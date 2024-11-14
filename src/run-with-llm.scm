@@ -41,5 +41,5 @@
 (define (run-with-llm lvars defns test_inputs test_outputs)
   (display (list lvars defns test_inputs test_outputs))
   (newline)
-  (system (string-append "python run.py \"" (format "~s" (list lvars defns test_inputs test_outputs)) "\""))
+  (system (apply string-append "python run.py " (map (lambda (x) (format "\"~s\" " x)) (list lvars defns test_inputs test_outputs))))
   )
