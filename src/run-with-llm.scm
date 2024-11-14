@@ -22,8 +22,23 @@
      (let ((str (format "~s" 'expr)))
        (system (string-append "python3 run.py \"" str "\""))))))
 
-(define (run-with-llm run-expr)
-  (let ((str (format "~s" run-expr)))
-    (system (string-append "python3 run.py \"" str "\"")))
-  (system "chez n-grams.scm")
-  (execute-run run-expr))
+;; (define (run-with-llm run-expr)
+;;   (let ((str (format "~s" run-expr)))
+;;     (system (string-append "python3 run.py \"" str "\"")))
+;;   (system "chez n-grams.scm")
+;;   (execute-run run-expr))
+
+; (define (run-with-llm run-expr variables, test_cases, temperature, n-gram order) 
+
+;   (let ((str (format "~s" run-expr)))
+
+;     (system (string-append "python3 run.py \"" str "\"")))
+
+;   (system "chez n-grams.scm")
+
+;   (execute-run run-expr))
+
+(define (run-with-llm lvars defns test_inputs test_outputs)
+  (display (list lvars defns test_inputs test_outputs))
+  (newline)
+  )
