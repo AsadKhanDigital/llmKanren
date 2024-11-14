@@ -8,10 +8,10 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Generate candidate solutions for the provided scheme definition given defined logic variables and sample test cases
-def gen_solutions(run_query):
+def gen_solutions(logic_variables, definitions, test_inputs, test_outputs):
 
     prompt = \
-        f"Given the following scheme 'run' query containg 'holes' and example test-cases:\n\n{run_query}\n\n" + \
+        f"Given the following scheme 'run' query containg 'holes' and example test-cases:\n\n{definitions}\n\n" + \
         "\n\nGenerate 10 valid candidate solutions to the run query in the form of lambda expressions (with definitions) for it.\n\n" + \
         """
         \n
@@ -72,8 +72,8 @@ def balance_parentheses(s):
     return ''.join(s)
 
 ## Generate the corpus.scm file
-def gen_corpus(run_query):
-    solutions = gen_solutions(run_query)
+def gen_corpus(logic_variables, definitions, test_inputs, test_outputs):
+    solutions = gen_solutions(logic_variables, definitions, test_inputs, test_outputs)
     solutions = balance_parentheses(solutions)
     
     with open("corpus.scm", "w") as f:
