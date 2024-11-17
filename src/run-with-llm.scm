@@ -5,6 +5,7 @@
 (load "mk-vicare.scm")
 (load "mk.scm")
 (load "interp-core.scm")
+(load "interp-app-optimization.scm")
 (load "construct-ordering.scm")
 (load "interp-simplified-dynamic.scm")
 
@@ -47,10 +48,24 @@
   (display "Writing to statistics.scm")
   (newline)
   (load "n-grams.scm") ; load n-grams.scm at top of file and then make it into a function
+  (display "Extracting one definition")
+  (newline)
+  (display (car (cdr (car defns))))
+  (newline)
   (display "Running MK query")
   (newline)
-  (let ((query '(run 1 (prog)
-                  (fresh (q r)
+  (display "Test Outputs")
+  (newline)
+  (display test_outputs)
+  (newline)
+
+  ;; represent test cases
+  ;; extract function name (e.g. something generic instead of "append")
+  ;; probably dont need to do this as discussed in previous call but
+  ;; abstract away absentos? maybe need to map them?
+
+  (letrec ((query `(run 1 (prog)
+                  (fresh ,lvars
                     (absento 'a prog)
                     (absento 'b prog)
                     (absento 'c prog)
@@ -68,10 +83,13 @@
                         (append '() '())
                         (append '(a) '(b))
                         (append '(c d) '(e f))))
-                    '(()
-                      (a b)
-                      (c d e f)))))))
+                    test_outputs)
+                      ))))
         (display query)
         (newline)
         (display (eval query))
-        (newline)))
+        (newline)
+        (display "Test Inputs")
+        (newline)
+        (display test_inputs)
+        ))
