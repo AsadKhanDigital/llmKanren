@@ -72,10 +72,7 @@
                     (absento 'd prog)
                     (absento 'e prog)
                     (absento 'f prog)
-                    (== `(lambda (l s)
-                          (if ,q
-                              ,r
-                              (cons (car l) (append (cdr l) s))))
+                    (== ',(car (cdr (car defns)))
                         prog)
                     (evalo
                     `(letrec ((append ,prog))
@@ -83,7 +80,7 @@
                         (append '() '())
                         (append '(a) '(b))
                         (append '(c d) '(e f))))
-                    test_outputs)
+                    ',test_outputs)
                       ))))
         (display query)
         (newline)
