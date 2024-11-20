@@ -40,6 +40,71 @@
 ;   (execute-run run-expr))
 
 
+; (define (run-with-llm lvars defns test_inputs test_outputs)
+;   (display (list lvars defns test_inputs test_outputs))
+;   (newline)
+;   (display "Executing run.py:")
+;   (newline)
+;   (system (apply string-append "python run.py " (map (lambda (x) (format "\"~s\" " x)) (list lvars defns test_inputs test_outputs))))
+;   (display "Writing to statistics.scm")
+;   (newline)
+;   (load "n-grams.scm") ; load n-grams.scm at top of file and then make it into a function
+;   (display "Extracting one definition:")
+;   (newline)
+;   (display (car (cdr (car defns))))
+;   (newline)
+;   (display "Running MK query:")
+;   (newline)
+;   (display "Test Inputs:")
+;   (newline)
+;   (display test_inputs)
+;   (newline)
+;   (display "Test Outputs:")
+;   (newline)
+;   (display test_outputs)
+;   (newline)
+
+;   ;; represent test cases
+;   ;; extract function name (e.g. something generic instead of "append")
+;   ;; probably dont need to do this as discussed in previous call but
+;   ;; abstract away absentos? maybe need to map them?
+
+;   (let ((lambda-expr (car (cdr (car defns)))))
+;     (display "Lambda Expression:")
+;     (newline)
+;     (display lambda-expr))
+;     (newline)
+
+;   ;; Modify the letrec section to use the defns parameter directly
+;   (letrec ((query `(run 1 (prog)
+;                   (fresh ,lvars
+;                     (absento 'a prog)
+;                     (absento 'b prog)
+;                     (absento 'c prog)
+;                     (absento 'd prog)
+;                     (absento 'e prog)
+;                     (absento 'f prog)
+;                     ; (== (car (cdr (car defns)))
+;                     ;     prog)
+;                     (== `(lambda (l s)
+;                           (if ,q
+;                               ,r
+;                               (cons (car l) (append (cdr l) s))))
+;                         prog)
+;                     (evalo
+;                     `(letrec ((append ,prog))
+;                       (list ,@',test_inputs))
+;                     ',test_outputs)))))
+;         (display "Query:")
+;         (newline)
+;         (display query)
+;         (newline)
+;         (display "Query Evaluated:")
+;         (newline)
+;         (display (eval query))
+;         (newline)
+;         ))
+
 (define (run-with-llm lvars defns test_inputs test_outputs)
   (display (list lvars defns test_inputs test_outputs))
   (newline)
@@ -76,31 +141,27 @@
     (newline)
 
   ;; Modify the letrec section to use the defns parameter directly
-  (letrec ((query `(run 1 (prog)
-                  (fresh ,lvars
-                    (absento 'a prog)
-                    (absento 'b prog)
-                    (absento 'c prog)
-                    (absento 'd prog)
-                    (absento 'e prog)
-                    (absento 'f prog)
-                    ; (== (car (cdr (car ,defns)))
-                    ;     prog)
-                    (== `(lambda (l s)
-                          (if ,q
-                              ,r
-                              (cons (car l) (append (cdr l) s))))
-                        prog)
-                    (evalo
-                    `(letrec ((append ,prog))
-                      (list ,@',test_inputs))
-                    ',test_outputs)))))
-        (display "Query:")
-        (newline)
-        (display query)
-        (newline)
-        (display "Query Evaluated:")
-        (newline)
-        (display (eval query))
-        (newline)
-        ))
+  (letrec ((query
+            (list 'run 1 '(prog)
+                  (list 'fresh lvars
+                        (list '== 
+                              (car (cdr (car defns)))  ; get lambda expression
+                              'prog)
+                        (list 'evalo
+                              (list 'letrec 
+                                    (list (list 'append 'prog))
+                                    (cons 'list test_inputs))
+                              '(()
+                                (a b)
+                                (c d e f)))))))
+    (display "Query:")
+    (newline)
+    (display query)
+    (newline)
+    (display "Query Evaluated:")
+    (newline)
+    (display (eval query))
+    (newline)))
+
+;; (run 1 (prog) (fresh (q r) (== `(lambda (l s) (if ,q ,r (cons (car l) (append (cdr l) s)))) prog) (evalo `(letrec ((append ,prog)) (list (append '() '()) (append '(a) '(b)) (append '(c d) '(e f)))) '(() (a b) (c d e f)))))
+;; (run 1 (prog) (fresh (q r) (== `(lambda (l s) (if q r (cons (car l) (append (cdr l) s)))) prog) (evalo (letrec ((append prog)) (list (append '() '()) (append '(a) '(b)) (append '(c d) '(e f)))) (() (a b) (c d e f)))))
