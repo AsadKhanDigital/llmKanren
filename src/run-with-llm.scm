@@ -39,57 +39,6 @@
 
 ;   (execute-run run-expr))
 
-(define (run-with-llm lvars defns test_inputs test_outputs)
-  (display (list lvars defns test_inputs test_outputs))
-  (newline)
-  (display "Executing run.py")
-  (newline)
-  (system (apply string-append "python run.py " (map (lambda (x) (format "\"~s\" " x)) (list lvars defns test_inputs test_outputs))))
-  (display "Writing to statistics.scm")
-  (newline)
-  (load "n-grams.scm") ; load n-grams.scm at top of file and then make it into a function
-  (display "Extracting one definition")
-  (newline)
-  (display (car (cdr (car defns))))
-  (newline)
-  (display "Running MK query")
-  (newline)
-  (display "Test Outputs")
-  (newline)
-  (display test_outputs)
-  (newline)
-
-  ;; represent test cases
-  ;; extract function name (e.g. something generic instead of "append")
-  ;; probably dont need to do this as discussed in previous call but
-  ;; abstract away absentos? maybe need to map them?
-
-  (letrec ((query `(run 1 (prog)
-                  (fresh ,lvars
-                    (absento 'a prog)
-                    (absento 'b prog)
-                    (absento 'c prog)
-                    (absento 'd prog)
-                    (absento 'e prog)
-                    (absento 'f prog)
-                    (== ',(car (cdr (car defns)))
-                        prog)
-                    (evalo
-                    `(letrec ((append ,prog))
-                        (list
-                        (append '() '())
-                        (append '(a) '(b))
-                        (append '(c d) '(e f))))
-                    ',test_outputs)
-                      ))))
-        (display query)
-        (newline)
-        (display (eval query))
-        (newline)
-        (display "Test Inputs")
-        (newline)
-        (display test_inputs)
-        ))
 
 (define (run-with-llm lvars defns test_inputs test_outputs)
   (display (list lvars defns test_inputs test_outputs))
