@@ -30,7 +30,7 @@
 (run-with-llm 
 
   '(q r)
-  '((append (lambda (l s) (if q r (cons (car l) (append (cdr l) s)))))) ; this goes directly into the letrec in the MK call
+  '((append (lambda (l s) (if ,q ,r (cons (car l) (append (cdr l) s)))))) ; this goes directly into the letrec in the MK call
   '((append '() '())
     (append '(a) '(b))
     (append '(c d) '(e f)))
