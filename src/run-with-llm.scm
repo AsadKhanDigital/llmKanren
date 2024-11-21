@@ -74,6 +74,8 @@
     (newline)
     (display "--------------------------------------")
     (newline)
+    (display defns)
+    (newline)
 
     ;; represent test cases
     ;; extract function name (e.g. something generic instead of "append")
@@ -83,30 +85,24 @@
     ;; Modify the letrec section to use the defns parameter directly
     (letrec ((query `(run 1 (prog)
                     (fresh ,lvars
-                      (absento 'a prog)
-                      (absento 'b prog)
-                      (absento 'c prog)
-                      (absento 'd prog)
-                      (absento 'e prog)
-                      (absento 'f prog)
-                      ; (== (car (cdr (car ,defns)))
-                      ;     prog)
-                      (== `(lambda (l s)
-                            (if ,q
-                                ,r
-                                (cons (car l) (append (cdr l) s))))
+                      (== (,'quasiquote ,(map cdr defns))
                           prog)
+                      ; (== `(lambda (l s)
+                      ;       (if ,q
+                      ;           ,r
+                      ;           (cons (car l) (append (cdr l) s))))
+                      ;     prog)
                       (evalo
-                      `(letrec ((append ,prog))
-                        (list ,@',test_inputs))
-                      ',test_outputs)))))
+                      (list 'letrec prog
+                        (,'quasiquote (list . ,test_inputs)))
+                      (,'quasiquote ,test_outputs))))))
       (let* ((end-time (current-time))
              (elapsed-time (time-difference end-time start-time))
              (seconds (time-second elapsed-time))
              (milliseconds (/ (time-nanosecond elapsed-time) 1000000.0)))
         (display "Query:")
         (newline)
-        (display query)
+        (pretty-print query)
         (newline)
         (newline)
         (display "Query Evaluated:")

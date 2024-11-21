@@ -27,13 +27,26 @@
 
 ; omitting the absentos for now, may need to add them back later (as a parameter?)
 
+; (run-with-llm 
+
+;   '(q r)
+;   '((define append (lambda (l s) (if ,q ,r (cons (car l) (append (cdr l) s)))))) ; this goes directly into the letrec in the MK call
+;   '((append '() '())
+;     (append '(a) '(b))
+;     (append '(c d) '(e f)))
+;   '(()
+;     (a b)
+;     (c d e f))
+;   #t
+; )
+
 (run-with-llm 
 
   '(q r)
-  '(append (lambda (l s) (if ,q ,r (cons (car l) (append (cdr l) s))))) ; this goes directly into the letrec in the MK call
-  '((append '() '())
-    (append '(a) '(b))
-    (append '(c d) '(e f)))
+  '((define f (lambda (l s) (if ,q ,r (cons (car l) (f (cdr l) s)))))) ; this goes directly into the letrec in the MK call
+  '((f '() '())
+    (f '(a) '(b))
+    (f '(c d) '(e f)))
   '(()
     (a b)
     (c d e f))
