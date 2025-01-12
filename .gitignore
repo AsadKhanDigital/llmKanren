@@ -190,3 +190,5 @@ run/
 output.txt
 print.py
 *.csv
+
+.DS_Store
