@@ -184,3 +184,9 @@ cython_debug/
 
 tmp/
 corpus.scm
+
+run/
+
+output.txt
+print.py
+*.csv

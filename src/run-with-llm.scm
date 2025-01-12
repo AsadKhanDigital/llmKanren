@@ -41,78 +41,159 @@
 
 
 (define (run-with-llm lvars defns test_inputs test_outputs debug?)
-  (let* ((output-filename 
-          (string-append "run/output-" 
-                        (number->string 
-                          (time-second (current-time)))  ; Changed this line
-                        ".txt"))
-         (start-time (current-time)))  ; Move to let* binding
-    
+  ;; Start total clock right away
+  (let* ((total-start (current-time))
+
+         ;; Time the LLM (Python) call
+         (llm-start (current-time))
+         ;; 1) LLM call: python run.py ...
+         (unused-rc (system (apply string-append 
+                                   "python run.py "
+                                   (map (lambda (x) (format "\"~s\" " x))
+                                        (list lvars defns test_inputs test_outputs debug?)))))
+
+         (llm-end (current-time))
+         (llm-elapsed (time-difference llm-end llm-start))
+
+         ;; Start transcript and do everything else
+         (output-filename (string-append
+                           "run/output-"
+                           (number->string (time-second llm-end)) ; for uniqueness
+                           ".txt")))
+
+    ;; Turn on transcript
     (transcript-on output-filename)
-    
-    (display "Generating corpus.scm:")
+
+    (display "LLM call done.\n")
+    (display "LLM call time (ms): ")
+    (display (+ (* 1000 (time-second llm-elapsed))
+                (/ (time-nanosecond llm-elapsed) 1000000.0)))
     (newline)
-    (system (apply string-append "python run.py " 
-                  (map (lambda (x) (format "\"~s\" " x)) 
-                       (list lvars defns test_inputs test_outputs debug?))))
-    (display "Writing to statistics.scm")
-    (newline)
-    (load "n-grams.scm") ; load n-grams.scm at top of file and then make it into a function
-    (display "--------------------------------------")
-    (newline)
-    (display "Running MK query")
-    (newline)
-    (display "--------------------------------------")
-    (newline)
-    (display "Test Inputs:")
-    (newline)
-    (display test_inputs)
-    (newline)
-    (display "Test Outputs:")
-    (newline)
-    (display test_outputs)
-    (newline)
-    (display "--------------------------------------")
-    (newline)
-    (display defns)
     (newline)
 
-    ;; represent test cases
-    ;; extract function name (e.g. something generic instead of "append")
-    ;; probably dont need to do this as discussed in previous call but
-    ;; abstract away absentos? maybe need to map them?
-
-    ;; Modify the letrec section to use the defns parameter directly
-    (letrec ((query `(run 1 (prog)
-                    (fresh ,lvars
-                      (== (,'quasiquote ,(map cdr defns))
-                          prog)
-                      ; (== `(lambda (l s)
-                      ;       (if ,q
-                      ;           ,r
-                      ;           (cons (car l) (append (cdr l) s))))
-                      ;     prog)
-                      (evalo
-                      (list 'letrec prog
+    ;; Next, time the Scheme portion
+    (display "Writing to statistics.scm\n")
+    (let* ((scheme-start (current-time))
+           (unused-rc2 (load "n-grams.scm")) ; analyze bigrams from corpus, etc.
+           ;; now run the query
+           (query
+            `(run 1 (prog)
+               (fresh ,lvars
+                 (== (,'quasiquote ,(map cdr defns)) prog)
+                 (evalo
+                  (list 'letrec prog
                         (,'quasiquote (list . ,test_inputs)))
-                      (,'quasiquote ,test_outputs))))))
-      (let* ((end-time (current-time))
-             (elapsed-time (time-difference end-time start-time))
-             (seconds (time-second elapsed-time))
-             (milliseconds (/ (time-nanosecond elapsed-time) 1000000.0)))
-        (display "Query:")
-        (newline)
-        (pretty-print query)
-        (newline)
-        (newline)
-        (display "Query Evaluated:")
-        (newline)
-        (display (eval query))
-        (newline)
-        (display "--------------------------------------")
-        (newline)
-        (display "Elapsed time: ")
-        (display (+ seconds milliseconds))
-        (display " milliseconds")
-        (newline)))
+                  (,'quasiquote ,test_outputs)))))
+           (scheme-mid (current-time))  ; time after n-grams load, before eval
+           (scheme-result (eval query))
+           (scheme-end (current-time))
+           (scheme-elapsed (time-difference scheme-end scheme-start))
+           (total-end scheme-end)
+           (total-elapsed (time-difference total-end total-start)))
+
+      ;; Print out standard logs
+      (display "Query:\n")
+      (pretty-print query)
+      (newline)
+      (display "Query Evaluated:\n")
+      (display scheme-result)
+      (newline)
+      (display "Number of evalo calls: ")
+      (display *eval-expo-call-count*)
+      (newline)
+      (set! *eval-expo-call-count* 0)
+      (display "--------------------------------------\n")
+      (display "LLM call time (ms): ")
+      (display (+ (* 1000 (time-second llm-elapsed))
+                  (/ (time-nanosecond llm-elapsed) 1000000.0)))
+      (newline)
+      (display "Scheme logic time (ms): ")
+      (display (+ (* 1000 (time-second scheme-elapsed))
+                  (/ (time-nanosecond scheme-elapsed) 1000000.0)))
+      (newline)
+      (display "Total time (ms): ")
+      (display (+ (* 1000 (time-second total-elapsed))
+                  (/ (time-nanosecond total-elapsed) 1000000.0)))
+      (newline))
+
+    ;; Turn off transcript
     (transcript-off)))
+
+(define (run-with-expert-ordering lvars defns test_inputs test_outputs debug?)
+  ;; Start total clock right away
+  (let* ((total-start (current-time))
+         ;; For the “expert only” approach, we do no LLM Python call:
+         (llm-start (current-time))
+         ;; we skip the entire python step
+         (llm-end (current-time))
+         (llm-elapsed (time-difference llm-end llm-start))
+
+         ;; Optionally set the global `lookup-optimization?` or some other
+         ;; variable so that `interp-simplified-dynamic.scm` uses only expert-ordering:
+         (unused (set! lookup-optimization? #f))  ;; forcibly do not reorder
+         (output-filename (string-append
+                           "run/output-"
+                           (number->string (time-second (current-time)))
+                           "-expert.txt")))
+
+    ;; Turn on transcript
+    (transcript-on output-filename)
+
+    (display "Expert ordering version (no LLM)!\n")
+    (display "LLM call time (ms): 0\n\n")  ; we skip Python call, so ~0
+
+    (display "Skipping n-grams.scm, using default expert ordering...\n\n")
+
+    ;; Next, time the Scheme portion
+    (let* ((scheme-start (current-time))
+
+           ;; do *not* load "n-grams.scm" – skipping the dynamic approach
+           ;; just run the query with the same code
+           (query
+            `(run 1 (prog)
+               (fresh ,lvars
+                 (== (,'quasiquote ,(map cdr defns)) prog)
+                 (evalo
+                  (list 'letrec prog
+                        (,'quasiquote (list . ,test_inputs)))
+                  (,'quasiquote ,test_outputs)))))
+           (scheme-mid (current-time))
+           (scheme-result (eval query))
+           (scheme-end (current-time))
+           (scheme-elapsed (time-difference scheme-end scheme-start))
+           (total-end scheme-end)
+           (total-elapsed (time-difference total-end total-start)))
+
+      ;; Print out standard logs
+      (display "Query:\n")
+      (pretty-print query)
+      (newline)
+      (display "Query Evaluated:\n")
+      (display scheme-result)
+      (newline)
+      (display "Number of evalo calls: ")
+      (display *eval-expo-call-count*)
+      (newline)
+      (set! *eval-expo-call-count* 0)
+      (display "--------------------------------------\n")
+      (display "LLM call time (ms): 0\n")   ; again ~0, no python call
+      (display "Scheme logic time (ms): ")
+      (display (+ (* 1000 (time-second scheme-elapsed))
+                  (/ (time-nanosecond scheme-elapsed) 1000000.0)))
+      (newline)
+      (display "Total time (ms): ")
+      (display (+ (* 1000 (time-second total-elapsed))
+                  (/ (time-nanosecond total-elapsed) 1000000.0)))
+      (newline))
+
+    ;; Turn off transcript
+    (transcript-off)))
+
+(define (run-compare lvars defns test_inputs test_outputs debug?)
+  (display "=== RUNNING with LLM-based dynamic ordering ===\n")
+  (run-with-llm lvars defns test_inputs test_outputs debug?)
+
+  (newline)
+  (display "=== RUNNING with EXPERT ordering only ===\n")
+  (run-with-expert-ordering lvars defns test_inputs test_outputs debug?))
+
