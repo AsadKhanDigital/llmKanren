@@ -299,9 +299,14 @@
 (define unit (lambda (c) c))
 (define choice (lambda (c f) (cons c f)))
 
+(define *inc-count* 0)
+
 (define-syntax inc
   (syntax-rules ()
-    ((_ e) (lambda () e))))
+    ((_ e)
+     (lambda ()
+       (set! *inc-count* (+ *inc-count* 1))  ;; increment global counter
+       e))))
 
 (define empty-f (inc (mzero)))
 (define pause (lambda (c) (inc c)))

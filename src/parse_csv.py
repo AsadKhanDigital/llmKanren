@@ -8,6 +8,7 @@ pattern_scheme_time = re.compile(r"Scheme logic time \(ms\):\s*([\d\.]+)")
 pattern_total_time = re.compile(r"Total time \(ms\):\s*([\d\.]+)")
 pattern_eval_calls = re.compile(r"Number of evalo calls:\s*(\d+)")
 pattern_expert = re.compile(r"^Expert ordering version \(no LLM\)!", re.MULTILINE)
+pattern_inc_calls = re.compile(r"Number of inc calls:\s*(\d+)")
 
 def parse_transcript(filepath):
     """
@@ -28,8 +29,9 @@ def parse_transcript(filepath):
     scheme_match = pattern_scheme_time.search(content)
     total_match = pattern_total_time.search(content)
     eval_match = pattern_eval_calls.search(content)
+    inc_match = pattern_inc_calls.search(content)
 
-    if not (llm_match and scheme_match and total_match and eval_match):
+    if not (llm_match and scheme_match and total_match and eval_match and inc_match):
         # If any piece is missing, skip
         return None
 
@@ -39,6 +41,7 @@ def parse_transcript(filepath):
         "scheme_time": scheme_match.group(1),
         "total_time": total_match.group(1),
         "eval_calls": eval_match.group(1),
+        "inc_calls": inc_match.group(1),
     }
 
 def base_test_name(filename):
@@ -83,11 +86,13 @@ def main():
             "test_name",
             # LLM-based columns
             "llm_eval_calls",
+            "llm_inc_calls",
             "llm_call_time_ms",
             "llm_scheme_time_ms",
             "llm_total_time_ms",
             # Expert columns
             "expert_eval_calls",
+            "expert_inc_calls",
             "expert_llm_call_time_ms",
             "expert_scheme_time_ms",
             "expert_total_time_ms",
@@ -107,12 +112,14 @@ def main():
 
                 # LLM-based
                 llm_info["eval_calls"],
+                llm_info["inc_calls"],
                 llm_info["llm_time"],
                 llm_info["scheme_time"],
                 llm_info["total_time"],
 
                 # Expert
                 exp_info["eval_calls"],
+                exp_info["inc_calls"],
                 exp_info["llm_time"],       # Yes, "llm_time" is ironically the 'LLM call time' for the expert approach (which is usually 0)
                 exp_info["scheme_time"],
                 exp_info["total_time"],

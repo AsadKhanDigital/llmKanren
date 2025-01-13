@@ -24,6 +24,13 @@
     (c d e f))
   #t)  ;; For example, you might set debug to #t here
 
+(run-compare
+  '(q r)
+  '((define id (lambda (x) (if ,q ,r x)))) 
+  '((id 'hello) (id 42) (id '(a b)))
+  '((hello) (42) ((a b)))
+  #f)
+
 ;; Add as many more test cases as you want below:
 ;; (run-with-llm
 ;;   '(your-var-here)
