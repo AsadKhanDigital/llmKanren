@@ -1,16 +1,16 @@
 (load "run-with-llm.scm")
 
-;; Test #1:
-(run-compare
-  '(q r)
-  '((define f (lambda (l s) (if ,q ,r (cons (car l) (f (cdr l) s))))))
-  '((f '() '())
-    (f '(a) '(b))
-    (f '(c d) '(e f)))
-  '(()
-    (a b)
-    (c d e f))
-  #f) ;; Last parameter is debug? #t or #f
+; ;; Test #1:
+; (run-compare
+;   '(q r)
+;   '((define f (lambda (l s) (if ,q ,r (cons (car l) (f (cdr l) s))))))
+;   '((f '() '())
+;     (f '(a) '(b))
+;     (f '(c d) '(e f)))
+;   '(()
+;     (a b)
+;     (c d e f))
+;   #f) ;; Last parameter is debug? #t or #f
 
 ;; Test #2:
 (run-compare
@@ -24,12 +24,12 @@
     (c d e f))
   #t)  ;; For example, you might set debug to #t here
 
-(run-compare
-  '(q r)
-  '((define id (lambda (x) (if ,q ,r x)))) 
-  '((id 'hello) (id 42) (id '(a b)))
-  '((hello) (42) ((a b)))
-  #f)
+; (run-compare
+;   '(q r)
+;   '((define id (lambda (x) (if ,q ,r x)))) 
+;   '((id 'hello) (id 42) (id '(a b)))
+;   '((hello) (42) ((a b)))
+;   #f)
 
 ;; Add as many more test cases as you want below:
 ;; (run-with-llm

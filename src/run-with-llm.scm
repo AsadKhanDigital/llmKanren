@@ -1,6 +1,6 @@
 (define *output-table-file-name* "tmp/variant-dynamic-ordering-table.scm")
 (define allow-incomplete-search? #f)
-(define lookup-optimization? #f)
+(define lookup-optimization? #t)
 
 (load "mk-vicare.scm")
 (load "mk.scm")

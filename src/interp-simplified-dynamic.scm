@@ -37,12 +37,23 @@
            (cons ctx (ordering-for-context ctx)))
          all-contexts)))
 
+(display "Orderings: ")
+(newline)
+(pretty-print orderings-alist)
+
+; (exit)
+
 ;; context -> list of eval-relations
 (define order-eval-relations
   (lambda (context)
     (cond
       ((assoc context orderings-alist) => cdr)
       (else
+      (display "Falling back to expert ordering for context ")
+      (newline)
+      (display "Context: ")
+      (display context)
+      (newline)
         ;(error 'eval-expo (string-append "bad context " (symbol->string context)))
 
         ; symbol? doesn't appear in the data, so we'll return the expert ordering
