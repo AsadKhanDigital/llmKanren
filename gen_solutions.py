@@ -8,14 +8,17 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Generate candidate solutions for the provided scheme definition given defined logic variables and sample test cases
-def gen_solutions(run_query):
+def gen_solutions(logic_variables, definitions, test_inputs, test_outputs):
 
     prompt = \
-        f"Given the following scheme 'run' query containg 'holes' and example test-cases:\n\n{run_query}\n\n" + \
-        "\n\nGenerate 10 valid candidate solutions to the run query in the form of lambda expressions (with definitions) for it.\n\n" + \
+        f"Here is the incomplete definition of a scheme function that contains logical holes:\n\n{definitions}\n\n" + \
+        f"Given the following logic variables: {logic_variables}\n\n" + \
+        f"Based on the following inputs: {test_inputs}\n\n" + \
+        f"The complete definition should produce the following output for each respective test case: {test_outputs}\n\n" + \
+        "Generate 10 different valid candidate solutions to the function definition in the form of lambda expressions (with definitions) for it.\n\n" + \
         """
         \n
-        Use only the following subet of scheme, do not use any other functions or constructs:
+        Use only the following subset of scheme, do not use any other functions or constructs:
         - 'define'
         - 'letrec'
         - 'lambda'
@@ -39,7 +42,7 @@ def gen_solutions(run_query):
         "\n\n Output only the function definitions. Do not include other text or formatting." + \
         "\n\nDo not include the ```scheme formatting in your response." + \
         "\n\nMake sure that all parantheses are balanced and there are no missing or extra parantheses." + \
-        "\n\nHere is an example of a syntactically correct candidate solution: (define candidate-* (lambda (x y) (+ x y)))"
+        "\n\nDo not use recursion in your solutions."
 
     try:
     
@@ -72,8 +75,8 @@ def balance_parentheses(s):
     return ''.join(s)
 
 ## Generate the corpus.scm file
-def gen_corpus(run_query):
-    solutions = gen_solutions(run_query)
+def gen_corpus(logic_variables, definitions, test_inputs, test_outputs):
+    solutions = gen_solutions(logic_variables, definitions, test_inputs, test_outputs)
     solutions = balance_parentheses(solutions)
     
     with open("corpus.scm", "w") as f:

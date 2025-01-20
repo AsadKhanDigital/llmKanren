@@ -37,17 +37,26 @@
            (cons ctx (ordering-for-context ctx)))
          all-contexts)))
 
+; (exit)
+
 ;; context -> list of eval-relations
 (define order-eval-relations
   (lambda (context)
     (cond
       ((assoc context orderings-alist) => cdr)
       (else
+      (display "Falling back to expert ordering for context ")
+      (newline)
+      (display "Context: ")
+      (display context)
+      (newline)
         ;(error 'eval-expo (string-append "bad context " (symbol->string context)))
 
         ; symbol? doesn't appear in the data, so we'll return the expert ordering
         ; for such cases.
         expert-ordering))))
+
+(define eval-expo-call-count 0)
 
 (define (eval-expo expr env val context)
   ; for debugging build-and-run-code
@@ -77,3 +86,10 @@
                        (order-eval-relations context)
                        ;expert-ordering
                        ))
+
+(define old-eval-expo eval-expo)
+
+(set! eval-expo
+  (lambda (expr env val context)
+    (set! eval-expo-call-count (+ eval-expo-call-count 1))
+    (old-eval-expo expr env val context)))

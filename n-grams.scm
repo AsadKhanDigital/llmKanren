@@ -186,4 +186,4 @@
 
 (write-data-to-file bigrams-sorted-by-type/counts "tmp/statistics.scm")
 
-(exit)
+;; (exit)

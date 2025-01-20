@@ -270,4 +270,3 @@
     (foldl f
            (f (car seq) init)
            (cdr seq))))
-

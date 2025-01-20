@@ -299,9 +299,12 @@
 (define unit (lambda (c) c))
 (define choice (lambda (c f) (cons c f)))
 
+(define inc-count 0)
+
 (define-syntax inc
   (syntax-rules ()
-    ((_ e) (lambda () e))))
+    ((_ e)
+     (lambda () (set! inc-count (+ inc-count 1)) e)))) ; increment global counter
 
 (define empty-f (inc (mzero)))
 (define pause (lambda (c) (inc c)))
@@ -1359,4 +1362,3 @@
       ,drop-N-b/c-dup-var ,drop-D-b/c-Y-or-N ,drop-T-b/c-Y-and-N
       ,move-T-to-D-b/c-t2-atom ,split-t-move-to-d-b/c-pair
       ,drop-from-D-b/c-T ,drop-t-b/c-t2-occurs-t1)))
-
