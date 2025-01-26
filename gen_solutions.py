@@ -8,14 +8,14 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Generate candidate solutions for the provided scheme definition given defined logic variables and sample test cases
-def gen_solutions(logic_variables, definitions, test_inputs, test_outputs):
+def gen_solutions(logic_variables, definitions, test_inputs, test_outputs, num_candidates=10):
 
     prompt = \
         f"Here is the incomplete definition of a scheme function that contains logical holes:\n\n{definitions}\n\n" + \
         f"Given the following logic variables: {logic_variables}\n\n" + \
         f"Based on the following inputs: {test_inputs}\n\n" + \
         f"The complete definition should produce the following output for each respective test case: {test_outputs}\n\n" + \
-        "Generate 10 different valid candidate solutions to the function definition in the form of lambda expressions (with definitions) for it.\n\n" + \
+        f"Generate {num_candidates} different valid candidate solutions to the function definition in the form of lambda expressions (with definitions) for it.\n\n" + \
         """
         \n
         Use only the following subset of scheme, do not use any other functions or constructs:
@@ -74,9 +74,8 @@ def balance_parentheses(s):
         s[stack.pop()] = ''
     return ''.join(s)
 
-## Generate the corpus.scm file
-def gen_corpus(logic_variables, definitions, test_inputs, test_outputs):
-    solutions = gen_solutions(logic_variables, definitions, test_inputs, test_outputs)
+def gen_corpus(logic_variables, definitions, test_inputs, test_outputs, num_candidates=10):
+    solutions = gen_solutions(logic_variables, definitions, test_inputs, test_outputs, num_candidates)
     solutions = balance_parentheses(solutions)
     
     with open("corpus.scm", "w") as f:

@@ -154,7 +154,13 @@
          (> (cdr e1) (cdr e2)))))
      counts-al)))
 
-(define bigrams (map reverse (apply append (map bigrams-for-expr exprs))))
+(define safe-bigrams-for-expr
+  (lambda (expr)
+    (guard (exn [else '()]) ; Return empty list on error
+      (bigrams-for-expr expr))))
+
+(define bigrams (map reverse (apply append (map safe-bigrams-for-expr exprs))))
+; (define bigrams (map reverse (apply append (map bigrams-for-expr exprs))))
 (define bigram-counts (count-bigrams bigrams))
 (define bigrams-sorted-by-counts (sort-counts-al-by-counts bigram-counts))
 
