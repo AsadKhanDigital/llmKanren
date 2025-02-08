@@ -8,9 +8,9 @@
 (load "src/MK/construct-ordering.scm")
 
 ;(load "src/MK/n-grams.scm")
-(load "src/MK/interp-simplified-dynamic.scm")
+;(load "src/MK/interp-simplified-dynamic.scm")
 
-#;(define (run-with-llm logic_variables definitions test_inputs test_outputs)
+(define (run-with-llm logic_variables definitions test_inputs test_outputs)
 
     ;(system (apply string-append "python3 src/run.py " (map (lambda (x) (format "\"~s\" " x)) (list logic_variables definitions test_inputs test_outputs))))
 

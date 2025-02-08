@@ -1,8 +1,8 @@
 (load "src/MK/pmatch.scm")
 (load "src/MK/prelude.scm")
-(load "src/MK/corpus_zinkov.scm") ; TODO - change this back
+(load "src/MK/corpus_zinkov.scm")
 
-(define max-n 5)
+(define max-n 2)
 
 (define ngrams-for-expr ; expr => '((newtoken (parent_token2 parent_token1 ...)) ...)
   (lambda (expr)

@@ -96,7 +96,7 @@
     ;((letrec-evalo expr env val))
     ;((match-evalo expr env val)))
 
-  (build-and-run-conde expr env val
+  (build-and-run-conde expr env val context
                        (order-eval-relations context)
                        ;expert-ordering
                        ))
@@ -104,7 +104,6 @@
 (define old-eval-expo eval-expo)
 
 (set! eval-expo
-  (lambda (expr env val context) ; become a list
-    ; <-- truncate list here
+  (lambda (expr env val context)
     (set! eval-expo-call-count (+ eval-expo-call-count 1))
     (old-eval-expo expr env val context)))
