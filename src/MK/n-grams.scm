@@ -113,23 +113,23 @@
       (ngrams-for-expr expr '(top-level) #f #f))))
 
 (define count-ngrams
-  (lambda (bg-ls)
+  (lambda (ng-ls)
     (letrec ((count-ngrams
-              (lambda (bg-ls count-al)
+              (lambda (ng-ls count-al)
                 (cond
-                  [(null? bg-ls)
+                  [(null? ng-ls)
                    (sort-counts-al-by-symbols count-al)]
                   [else
-                   (let ((bg (car bg-ls)))
+                   (let ((ng (car ng-ls)))
                      (let ((count-al
                             (cond
-                              [(assoc bg count-al) =>
+                              [(assoc ng count-al) =>
                                (lambda (pr)
-                                 (cons (cons bg (add1 (cdr pr)))
+                                 (cons (cons ng (add1 (cdr pr)))
                                        (remove pr count-al)))]
-                              [else (cons (cons bg 1) count-al)])))
-                       (count-ngrams (cdr bg-ls) count-al)))]))))
-      (count-ngrams bg-ls '()))))
+                              [else (cons (cons ng 1) count-al)])))
+                       (count-ngrams (cdr ng-ls) count-al)))]))))
+      (count-ngrams ng-ls '()))))
 
 (define sort-counts-al-by-symbols
   (lambda (counts-al)
