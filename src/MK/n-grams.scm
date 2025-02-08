@@ -269,8 +269,8 @@
     (guard (exn [else '()]) ; Return empty list on error
       (ngrams-for-expr expr))))
 
-(define ngrams (map reverse (apply append (map safe-ngrams-for-expr exprs))))
-(display ngrams)
+(define ngrams (apply append (map safe-ngrams-for-expr exprs)))
+(pretty-print ngrams)
 (newline)
 
 ; (define bigrams (map reverse (apply append (map bigrams-for-expr exprs))))
