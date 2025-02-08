@@ -1,6 +1,6 @@
 (load "src/MK/pmatch.scm")
 (load "src/MK/prelude.scm")
-(load "src/MK/corpus.scm")
+(load "src/MK/corpus_zinkov.scm") ; TODO - change this back
 
 (define bigrams-for-expr
   (lambda (expr)
