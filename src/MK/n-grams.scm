@@ -2,7 +2,117 @@
 (load "src/MK/prelude.scm")
 (load "src/MK/corpus_zinkov.scm") ; TODO - change this back
 
-(define bigrams-for-expr
+(define max-n 3)
+
+(define ngrams-for-expr ; expr => '((token2 token1) ...)
+  (lambda (expr)
+    (letrec ((ngrams-for-expr
+              (lambda (expr parent defn-name args)
+                (display expr)
+                (newline)
+                (display parent)
+                (newline)
+                (display defn-name)
+                (newline)
+                (display args)
+                (newline)
+                (newline)
+                (pmatch expr
+                  [(eq? ,e1 ,e2)
+                   (error 'bigrams-for-expr (format "unconverted eq?"))]
+                  [(eqv? ,e1 ,e2)
+                   (error 'bigrams-for-expr (format "unconverted eqv?"))]
+                  [(cond . ,c*)
+                   (error 'bigrams-for-expr (format "unconverted cond"))]
+                  [(match ,e . ,c*)
+                   (cons (list 'match parent)
+                         (append (ngrams-for-expr e 'match-against defn-name args)
+                                 (apply append (map (lambda (c) (ngrams-for-expr (cadr c) 'match-body defn-name args)) c*))))]
+                  [(quote ())
+                   (list (list 'quoted-datum parent))]
+                  [(quote ,x) (guard (symbol? x))
+                   (list (list 'quoted-datum parent))]
+                  [(quote ,ls) (guard (list? ls))
+                   (list (list 'quoted-datum parent))]
+                  [(quote ,_)
+                   (error 'bigrams-for-expr (format "unknown quoted form ~s" _))]                  
+                  [#t
+                   (list (list 'bool parent))]
+                  [#f
+                   (list (list 'bool parent))]
+                  [,n (guard (number? n))
+                   (list (list 'num parent))]
+                  [,x (guard (symbol? x))
+                   (list
+                     (cond
+                       [(eqv? x defn-name) (list 'var parent)]
+                       [(memv x args) (list 'var parent)]
+                       [else (list 'var parent)]))]
+                  ; because our interpreter doesn't support define, code as letrec
+                  [(define ,id ,e) (guard (symbol? id))
+                   (cons (list 'letrec parent) (ngrams-for-expr e 'letrec-rhs id args))]
+                  [(lambda ,x ,body)
+                   (cons (list 'lambda parent)
+                         (ngrams-for-expr body
+                                           'lambda
+                                           defn-name
+                                           (if (symbol? x) (list x) x)))]
+                  [(if ,test ,conseq ,alt)
+                   (cons (list 'if parent)
+                         (append (ngrams-for-expr test 'if-test defn-name args)
+                                 (ngrams-for-expr conseq 'if-conseq defn-name args)
+                                 (ngrams-for-expr alt 'if-alt defn-name args)))]
+                  [(symbol? ,e)
+                   (cons (list 'symbol? parent)
+                         (ngrams-for-expr e 'symbol? defn-name args))]
+                  [(not ,e)
+                   (cons (list 'not parent)
+                         (ngrams-for-expr e 'not defn-name args))]
+                  [(and . ,e*)
+                   (cons (list 'and parent)
+                         (apply append (map (lambda (e) (ngrams-for-expr e 'and defn-name args)) e*)))]
+                  [(or . ,e*)
+                   (cons (list 'or parent)
+                         (apply append (map (lambda (e) (ngrams-for-expr e 'or defn-name args)) e*)))]
+                  [(list . ,e*)
+                   (cons (list 'list parent)
+                         (apply append (map (lambda (e) (ngrams-for-expr e 'list defn-name args)) e*)))]
+                  [(null? ,e)
+                   (cons (list 'null? parent)
+                         (ngrams-for-expr e 'null? defn-name args))]
+                  [(pair? ,e)
+                   (cons (list 'pair? parent)
+                         (ngrams-for-expr e 'pair? defn-name args))]
+                  [(car ,e)
+                   (cons (list 'car parent)
+                         (ngrams-for-expr e 'car defn-name args))]
+                  [(cdr ,e)
+                   (cons (list 'cdr parent)
+                         (ngrams-for-expr e 'cdr defn-name args))]
+                  [(cons ,e1 ,e2)
+                   (cons (list 'cons parent)
+                         (append (ngrams-for-expr e1 'cons-e1 defn-name args)
+                                 (ngrams-for-expr e2 'cons-e2 defn-name args)))]
+                  [(equal? ,e1 ,e2)
+                   (cons (list 'equal? parent)
+                         (append (ngrams-for-expr e1 'equal?-e1 defn-name args)
+                                 (ngrams-for-expr e2 'equal?-e2 defn-name args)))]
+                  [(let ,binding* ,e)
+                   (cons (list 'let parent)
+                         (append (apply append (map (lambda (binding) (ngrams-for-expr (cadr binding) 'let-rhs defn-name args)) binding*))
+                                 (ngrams-for-expr e 'let-body defn-name args)))]
+                  [(letrec ((,id (lambda ,x ,body))) ,e)
+                   (cons (list 'letrec parent)
+                         (append (ngrams-for-expr `(lambda ,x ,body) 'letrec-rhs defn-name args)
+                                 (ngrams-for-expr e 'letrec-body id args)))]
+                  [(,e . ,e*) ;; application
+                   (cons (list 'app parent)
+                         (append (ngrams-for-expr e 'app-rator defn-name args)
+                                 (apply append (map (lambda (e) (ngrams-for-expr e 'app-rand* defn-name args)) e*))))]
+                  [else (error 'bigrams-for-expr (format "unknown expression type ~s" expr))]))))
+      (ngrams-for-expr expr 'top-level #f #f))))
+
+(define bigrams-for-expr ; expr => '((token2 token1) ...)
   (lambda (expr)
     (letrec ((bigrams-for-expr
               (lambda (expr parent defn-name args)
@@ -157,9 +267,11 @@
 (define safe-bigrams-for-expr
   (lambda (expr)
     (guard (exn [else '()]) ; Return empty list on error
-      (bigrams-for-expr expr))))
+      (ngrams-for-expr expr))))
 
 (define bigrams (map reverse (apply append (map safe-bigrams-for-expr exprs))))
+
+
 ; (define bigrams (map reverse (apply append (map bigrams-for-expr exprs))))
 (define bigram-counts (count-bigrams bigrams))
 (define bigrams-sorted-by-counts (sort-counts-al-by-counts bigram-counts))
