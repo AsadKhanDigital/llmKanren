@@ -14,7 +14,7 @@
     (load "src/MK/n-grams.scm")
     (load "src/MK/interp-simplified-dynamic.scm")
 
-    (letrec 
+    (letrec
     
     ((query `(run 1 (prog)
                     (fresh ,logic_variables
