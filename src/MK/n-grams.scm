@@ -13,15 +13,6 @@
                                    parent))
                 (define (context tok)
                   (cons tok parent^))
-                (display expr)
-                (newline)
-                (display parent)
-                (newline)
-                (display defn-name)
-                (newline)
-                (display args)
-                (newline)
-                (newline)
                 (pmatch expr
                   [(eq? ,e1 ,e2)
                    (error 'bigrams-for-expr (format "unconverted eq?"))]
@@ -279,11 +270,6 @@
       (ngrams-for-expr expr))))
 
 (define bigrams (map reverse (apply append (map safe-bigrams-for-expr exprs))))
-
-(newline)
-(pretty-print bigrams)
-(newline)
-
 
 ; (define bigrams (map reverse (apply append (map bigrams-for-expr exprs))))
 (define bigram-counts (count-bigrams bigrams))
