@@ -5,8 +5,8 @@
 ;; (((context form) . count) ...)
 (define ngrams-statistics (read-data-from-file "src/MK/statistics.scm"))
 
-(define (entry-ctx entry)   (caar entry))
-(define (entry-child entry) (cadar entry))
+(define (entry-ctx entry)   (cdar entry))
+(define (entry-child entry) (caar entry))
 (define (entry-count entry) (cdr entry))
 
 
