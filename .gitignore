@@ -186,3 +186,5 @@ tmp/
 corpus.scm
 
 outputs/
+
+*.csv

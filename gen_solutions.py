@@ -8,7 +8,7 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Generate candidate solutions for the provided scheme definition given defined logic variables and sample test cases
-def gen_solutions(logic_variables, definitions, test_inputs, test_outputs, num_candidates=10):
+def gen_solutions(logic_variables, definitions, test_inputs, test_outputs, num_candidates=50):
 
     prompt = \
         f"Here is the incomplete definition of a scheme function that contains logical holes:\n\n{definitions}\n\n" + \

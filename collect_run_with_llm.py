@@ -120,7 +120,14 @@ def main():
 
             success = True
 
-        log_filename = f"outputs/test_{test_id}_{approach}_{num_cand if num_cand else 'na'}.log"
+        log_filename = f"outputs/test_{test_id}_{approach}_{num_cand if num_cand else ''}.log"
+        if approach in ("llm", "zinkov"):
+            try:
+                with open("corpus.scm", "r", encoding="utf-8") as cf:
+                    corpus_content = cf.read()
+                captured_output += "\n\nCorpus:\n" + corpus_content
+            except Exception as e:
+                captured_output += "\n\nCorpus not found."
         with open(log_filename, "w", encoding="utf-8") as lf:
             lf.write(captured_output)
 
