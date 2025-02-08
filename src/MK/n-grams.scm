@@ -150,7 +150,7 @@
      (lambda (e1 e2) (> (cdr e1) (cdr e2)))
      counts-al)))
 
-(define sort-counts-al-by-type/counts
+(define sort-counts-al-by-type/counts ; also broken
   (lambda (counts-al)
     (sort
      (lambda (e1 e2)
@@ -173,10 +173,10 @@
 (newline)
 
 (define ngram-counts (count-ngrams ngrams))
-(define ngrams-sorted-by-counts (sort-counts-al-by-counts ngram-counts))
+; (define ngrams-sorted-by-counts (sort-counts-al-by-counts ngram-counts))
 
 ;; this is the important one
-(define ngrams-sorted-by-type/counts (sort-counts-al-by-type/counts ngram-counts))
+; (define ngrams-sorted-by-type/counts (sort-counts-al-by-type/counts ngram-counts))
 
 (define merge-entries
   (lambda (alist key-f)
@@ -196,11 +196,11 @@
 (define alist-value-descending-comparator
   (lambda (e1 e2) (> (cdr e1) (cdr e2))))
 
-(define global-frequency-ordering
+#;(define global-frequency-ordering
   (list-sort alist-value-descending-comparator
              (merge-entries ngrams-sorted-by-type/counts
                             cadr)))
 
-(write-data-to-file ngrams-sorted-by-type/counts "src/MK/statistics.scm")
+(write-data-to-file ngram-counts "src/MK/statistics.scm")
 
 ;; (exit)
