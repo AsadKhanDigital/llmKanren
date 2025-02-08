@@ -15,11 +15,11 @@
                   (cons tok parent^))
                 (pmatch expr
                   [(eq? ,e1 ,e2)
-                   (error 'bigrams-for-expr (format "unconverted eq?"))]
+                   (error 'ngrams-for-expr (format "unconverted eq?"))]
                   [(eqv? ,e1 ,e2)
-                   (error 'bigrams-for-expr (format "unconverted eqv?"))]
+                   (error 'ngrams-for-expr (format "unconverted eqv?"))]
                   [(cond . ,c*)
-                   (error 'bigrams-for-expr (format "unconverted cond"))]
+                   (error 'ngrams-for-expr (format "unconverted cond"))]
                   [(match ,e . ,c*)
                    (cons (cons 'match parent)
                          (append (ngrams-for-expr e (context 'match-against) defn-name args)
@@ -34,7 +34,7 @@
                   [(quote ,ls) (guard (list? ls))
                    (list (context 'quoted-datum))]
                   [(quote ,_)
-                   (error 'bigrams-for-expr (format "unknown quoted form ~s" _))]                  
+                   (error 'ngrams-for-expr (format "unknown quoted form ~s" _))]                  
                   [#t
                    (list (context 'bool))]
                   [#f
@@ -109,12 +109,12 @@
                    (cons (context 'app)
                          (append (ngrams-for-expr e (context 'app-rator) defn-name args)
                                  (apply append (map (lambda (e) (ngrams-for-expr e (context 'app-rand*) defn-name args)) e*))))]
-                  [else (error 'bigrams-for-expr (format "unknown expression type ~s" expr))]))))
+                  [else (error 'ngrams-for-expr (format "unknown expression type ~s" expr))]))))
       (ngrams-for-expr expr '(top-level) #f #f))))
 
-(define count-bigrams
+(define count-ngrams
   (lambda (bg-ls)
-    (letrec ((count-bigrams
+    (letrec ((count-ngrams
               (lambda (bg-ls count-al)
                 (cond
                   [(null? bg-ls)
@@ -128,8 +128,8 @@
                                  (cons (cons bg (add1 (cdr pr)))
                                        (remove pr count-al)))]
                               [else (cons (cons bg 1) count-al)])))
-                       (count-bigrams (cdr bg-ls) count-al)))]))))
-      (count-bigrams bg-ls '()))))
+                       (count-ngrams (cdr bg-ls) count-al)))]))))
+      (count-ngrams bg-ls '()))))
 
 (define sort-counts-al-by-symbols
   (lambda (counts-al)
@@ -173,12 +173,11 @@
 (pretty-print ngrams)
 (newline)
 
-; (define bigrams (map reverse (apply append (map bigrams-for-expr exprs))))
-(define bigram-counts (count-bigrams ngrams))
-(define bigrams-sorted-by-counts (sort-counts-al-by-counts bigram-counts))
+(define ngram-counts (count-ngrams ngrams))
+(define ngrams-sorted-by-counts (sort-counts-al-by-counts ngram-counts))
 
 ;; this is the important one
-(define bigrams-sorted-by-type/counts (sort-counts-al-by-type/counts bigram-counts))
+(define ngrams-sorted-by-type/counts (sort-counts-al-by-type/counts ngram-counts))
 
 (define merge-entries
   (lambda (alist key-f)
@@ -200,9 +199,9 @@
 
 (define global-frequency-ordering
   (list-sort alist-value-descending-comparator
-             (merge-entries bigrams-sorted-by-type/counts
+             (merge-entries ngrams-sorted-by-type/counts
                             cadr)))
 
-(write-data-to-file bigrams-sorted-by-type/counts "src/MK/statistics.scm")
+(write-data-to-file ngrams-sorted-by-type/counts "src/MK/statistics.scm")
 
 ;; (exit)
