@@ -22,3 +22,7 @@ if __name__ == "__main__":
         f.write("  '(\n")
         f.write(corpus)
         f.write("\n))")
+    with open("./src/MK/corpus.scm", "r") as f: # for debugging
+        print("Corpus:")
+        print(f.read())
+        print("\n")
