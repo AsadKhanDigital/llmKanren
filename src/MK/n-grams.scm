@@ -117,8 +117,7 @@
     (letrec ((count-ngrams
               (lambda (ng-ls count-al)
                 (cond
-                  [(null? ng-ls)
-                   (sort-counts-al-by-symbols count-al)]
+                  [(null? ng-ls) count-al]
                   [else
                    (let ((ng (car ng-ls)))
                      (let ((count-al
@@ -131,7 +130,7 @@
                        (count-ngrams (cdr ng-ls) count-al)))]))))
       (count-ngrams ng-ls '()))))
 
-(define sort-counts-al-by-symbols
+(define sort-counts-al-by-symbols ; broken for n-grams?
   (lambda (counts-al)
     (sort
      (lambda (e1 e2)
