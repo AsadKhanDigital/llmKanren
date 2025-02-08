@@ -1,14 +1,19 @@
 (load "src/MK/pmatch.scm")
 (load "src/MK/prelude.scm")
-(load "src/MK/corpus_zinkov.scm")
+(load "src/MK/corpus.scm")
 
-(define max-n 2)
+(define max-n 4)
+
+(define (n-range n max-n)
+  (if (> n max-n)
+    '()
+    (cons n (n-range (+ n 1) max-n))))
 
 (define ngrams-for-expr ; expr => '((newtoken (parent_token2 parent_token1 ...)) ...)
-  (lambda (expr)
+  (lambda (n expr)
     (letrec ((ngrams-for-expr
               (lambda (expr parent defn-name args)
-                (define parent^ (if (> (length parent) (- max-n 1))
+                (define parent^ (if (> (length parent) (- n 1))
                                    (reverse (cdr (reverse parent)))
                                    parent))
                 (define (context tok)
@@ -166,7 +171,11 @@
 (define safe-ngrams-for-expr
   (lambda (expr)
     (guard (exn [else '()]) ; Return empty list on error
-      (ngrams-for-expr expr))))
+      (apply
+        append
+        (map (lambda (n) (ngrams-for-expr n expr))
+             (n-range 2 max-n)))
+      )))
 
 (define ngrams (apply append (map safe-ngrams-for-expr exprs)))
 (pretty-print ngrams)

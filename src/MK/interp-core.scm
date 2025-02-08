@@ -1,7 +1,7 @@
 (define *primitives-first-class-and-shadowable?* #f)
 (define *if-test-requires-boolean?* #t)
 
-(define max-n 2) ; n-gram. I don't like that there are two places
+(define max-n 4) ; n-gram. I don't like that there are two places
 (define (ctx-extend old-ctx new)
   (let ((ctx (cons new old-ctx)))
     (if (> (length ctx) (- max-n 1))

@@ -59,16 +59,20 @@
     (cond
       ((assoc context orderings-alist) => cdr)
       (else
-      (display "Falling back to expert ordering for context ")
-      (newline)
-      (display "Context: ")
-      (display context)
-      (newline)
-        ;(error 'eval-expo (string-append "bad context " (symbol->string context)))
+        (if (null? context)
+             (begin 
+                (display "Falling back to expert ordering for context ")
+                (newline)
+                (display "Context: ")
+                (display context)
+                (newline)
+                ;(error 'eval-expo (string-append "bad context " (symbol->string context)))
 
-        ; symbol? doesn't appear in the data, so we'll return the expert ordering
-        ; for such cases.
-        expert-ordering))))
+                ; symbol? doesn't appear in the data, so we'll return the expert ordering
+                ; for such cases.
+                expert-ordering)
+             (order-eval-relations (reverse (cdr (reverse context)))))
+                                   ))))
 
 (define eval-expo-call-count 0)
 
