@@ -264,15 +264,17 @@
          (> (cdr e1) (cdr e2)))))
      counts-al)))
 
-(define safe-bigrams-for-expr
+(define safe-ngrams-for-expr
   (lambda (expr)
     (guard (exn [else '()]) ; Return empty list on error
       (ngrams-for-expr expr))))
 
-(define bigrams (map reverse (apply append (map safe-bigrams-for-expr exprs))))
+(define ngrams (map reverse (apply append (map safe-ngrams-for-expr exprs))))
+(display ngrams)
+(newline)
 
 ; (define bigrams (map reverse (apply append (map bigrams-for-expr exprs))))
-(define bigram-counts (count-bigrams bigrams))
+(define bigram-counts (count-bigrams ngrams))
 (define bigrams-sorted-by-counts (sort-counts-al-by-counts bigram-counts))
 
 ;; this is the important one
