@@ -5,10 +5,14 @@
 ;; (((context form) . count) ...)
 (define ngrams-statistics (read-data-from-file "src/MK/statistics.scm"))
 
+;; keys in ngram-statistic = (cons child parent) = ngram
+;; value in n-gram-statitic = count 
+;; child  :: token
+;; {cxt = parent} :: list of tokens
+;; entry = (ngram, count) 
 (define (entry-ctx entry)   (cdar entry))
 (define (entry-child entry) (caar entry))
 (define (entry-count entry) (cdr entry))
-
 
 (define unique
   (lambda (l)
@@ -100,6 +104,7 @@
 (define old-eval-expo eval-expo)
 
 (set! eval-expo
-  (lambda (expr env val context)
+  (lambda (expr env val context) ; become a list
+    ; <-- truncate list here
     (set! eval-expo-call-count (+ eval-expo-call-count 1))
     (old-eval-expo expr env val context)))
