@@ -21,6 +21,9 @@ def balance_parentheses(s: str) -> str:
 
     return ''.join(ch for i, ch in enumerate(s_list) if i not in remove_indices)
 
+def remove_trailing_newlines(s: str) -> str:
+    return s.rstrip('\n')
+
 def generate_corpus(logic_variables, definition, test_inputs, test_outputs, num_candidates=10):
     prompt = generate_prompt(logic_variables, definition, test_inputs, test_outputs)
     corpus = []
@@ -28,6 +31,7 @@ def generate_corpus(logic_variables, definition, test_inputs, test_outputs, num_
     for _ in range(num_candidates):
         solution = generate_solution(prompt)
         solution = balance_parentheses(solution)
+        solution = remove_trailing_newlines(solution)
         corpus.append(solution)
 
     return "\n".join(corpus)
