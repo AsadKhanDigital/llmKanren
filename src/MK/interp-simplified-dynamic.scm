@@ -5,13 +5,18 @@
 ;; (((context form) . count) ...)
 (define ngrams-statistics (read-data-from-file "src/MK/statistics.scm"))
 
+(define (entry-ctx entry)   (caar entry))
+(define (entry-child entry) (cadar entry))
+(define (entry-count entry) (cdr entry))
+
+
 (define unique
   (lambda (l)
     (if (null? l)
       '()
       (cons (car l) (remove (car l) (unique (cdr l)))))))
 
-(define all-contexts (unique (map caar ngrams-statistics)))
+(define all-contexts (unique (map entry-ctx ngrams-statistics)))
 
 ;; orderings-alist structure:
 ;;
@@ -19,8 +24,11 @@
 (define orderings-alist
   (let ((ordering-for-context
           (lambda (ctx)
-            (let ((ctx-stats (map (lambda (entry) (cons (cadar entry) (cdr entry)))
-                                  (filter (lambda (entry) (equal? ctx (caar entry))) ngrams-statistics))))
+            (let* ((filtered (filter (lambda (entry) (equal? ctx (entry-ctx entry))) ngrams-statistics))
+                   (ctx-stats (map (lambda (entry) (cons (entry-child entry) (entry-count entry)))
+                                   filtered)))
+              ;; expert-ordering-alist :: (list of (child . evalo-branch))
+
               ;; ctx-stats has the structure:
               ;;
               ;; ((form . count) ...)
@@ -36,6 +44,8 @@
     (map (lambda (ctx)
            (cons ctx (ordering-for-context ctx)))
          all-contexts)))
+
+(pretty-print orderings-alist)
 
 ; (exit)
 
