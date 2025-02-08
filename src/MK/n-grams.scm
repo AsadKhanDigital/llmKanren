@@ -1,6 +1,6 @@
-(load "pmatch.scm")
-(load "prelude.scm")
-(load "corpus.scm")
+(load "src/MK/pmatch.scm")
+(load "src/MK/prelude.scm")
+(load "src/MK/corpus.scm")
 
 (define bigrams-for-expr
   (lambda (expr)
@@ -190,6 +190,6 @@
              (merge-entries bigrams-sorted-by-type/counts
                             cadr)))
 
-(write-data-to-file bigrams-sorted-by-type/counts "tmp/statistics.scm")
+(write-data-to-file bigrams-sorted-by-type/counts "src/MK/statistics.scm")
 
 ;; (exit)

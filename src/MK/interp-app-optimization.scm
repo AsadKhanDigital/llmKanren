@@ -1,4 +1,4 @@
-(load "interp-core.scm")
+(load "src/MK/interp-core.scm")
 
 (set! app-evalo
       (lambda (expr env val)

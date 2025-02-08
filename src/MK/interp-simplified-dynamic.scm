@@ -1,9 +1,9 @@
-(load "prelude.scm")
+(load "src/MK/prelude.scm")
 
 ;; ngrams-statistics structure:
 ;;
 ;; (((context form) . count) ...)
-(define ngrams-statistics (read-data-from-file "tmp/statistics.scm"))
+(define ngrams-statistics (read-data-from-file "src/MK/statistics.scm"))
 
 (define unique
   (lambda (l)

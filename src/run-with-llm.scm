@@ -1,37 +1,24 @@
 (define allow-incomplete-search? #f)
 (define lookup-optimization? #t)
 
-(load "mk-vicare.scm")
-(load "mk.scm")
-(load "interp-core.scm")
-(load "interp-app-optimization.scm")
-(load "construct-ordering.scm")
+(load "src/MK/mk-vicare.scm")
+(load "src/MK/mk.scm")
+(load "src/MK/interp-core.scm")
+(load "src/MK/interp-app-optimization.scm")
+(load "src/MK/construct-ordering.scm")
 
+(define (run-with-llm logic_variables definitions test_inputs test_outputs)
 
-(define (run-with-llm lvars defns test_inputs test_outputs)
-  
+    (system (apply string-append "python3 src/run.py " (map (lambda (x) (format "\"~s\" " x)) (list logic_variables definitions test_inputs test_outputs))))
 
-    (time
-        (system (apply string-append "python run.py " 
-                  (map (lambda (x) (format "\"~s\" " x)) 
-                       (list lvars defns test_inputs test_outputs))))
-    )
-
-    (newline)
-    (newline)
-
-    (load "n-grams.scm")
-    (load "interp-simplified-dynamic.scm")
-
-    (time
-    
-    
+    (load "src/MK/n-grams.scm")
+    (load "src/MK/interp-simplified-dynamic.scm")
 
     (letrec 
     
     ((query `(run 1 (prog)
-                    (fresh ,lvars
-                      (== (,'quasiquote ,(map cdr defns))
+                    (fresh ,logic_variables
+                      (== (,'quasiquote ,(map cdr definitions))
                           prog)
                       (evalo
                       (list 'letrec prog
@@ -62,4 +49,5 @@
     (display eval-expo-call-count)
     (set! eval-expo-call-count 0)
     (newline)
-    (newline))))
+    (newline))
+)
