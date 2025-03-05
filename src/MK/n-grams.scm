@@ -2,7 +2,7 @@
 (load "src/MK/prelude.scm")
 (load "src/MK/corpus.scm")
 
-(define max-n 4)
+(define max-n *max-n*)
 
 (define (n-range n max-n)
   (if (> n max-n)
@@ -178,8 +178,8 @@
       )))
 
 (define ngrams (apply append (map safe-ngrams-for-expr exprs)))
-(pretty-print ngrams)
-(newline)
+; (pretty-print ngrams)
+; (newline)
 
 (define ngram-counts (count-ngrams ngrams))
 ; (define ngrams-sorted-by-counts (sort-counts-al-by-counts ngram-counts))
@@ -213,3 +213,6 @@
 (write-data-to-file ngram-counts "src/MK/statistics.scm")
 
 ;; (exit)
+
+; Export max-n by making it available in global scope
+(set! *max-n* max-n)

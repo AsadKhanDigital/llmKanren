@@ -49,7 +49,7 @@
            (cons ctx (ordering-for-context ctx)))
          all-contexts)))
 
-(pretty-print orderings-alist)
+; (pretty-print orderings-alist)
 
 ; (exit)
 
@@ -61,10 +61,10 @@
       (else
         (if (null? context)
              (begin 
-                (display "Falling back to expert ordering for context ")
-                (newline)
-                (display "Context: ")
-                (display context)
+                ; (display "Falling back to expert ordering for context ")
+                ; (newline)
+                ; (display "Context: ")
+                ; (display context)
                 (newline)
                 ;(error 'eval-expo (string-append "bad context " (symbol->string context)))
 

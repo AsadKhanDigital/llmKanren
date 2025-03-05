@@ -1,6 +1,6 @@
-(load "src/run-with-llm.scm")
+(load "src/run-with-zinkov.scm")
 
-(run-with-llm 
+(run-with-zinkov 
     '(q r)
     '((define f (lambda (l s) (if ,q ,r (cons (car l) (f (cdr l) s))))))
     '((f '() '())

@@ -1,6 +1,6 @@
-(load "src/run-with-llm.scm")
+(load "src/run-with-expert.scm")
 
-(run-with-llm 
+(run-with-expert 
     '(q r)
     '((define f (lambda (l s) (if ,q ,r (cons (car l) (f (cdr l) s))))))
     '((f '() '())
@@ -9,6 +9,6 @@
     '(()
         (a b)
         (c d e f))
-    2)
+)
 
 (exit)
