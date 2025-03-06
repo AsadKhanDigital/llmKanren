@@ -20,3 +20,5 @@ __pycache__/
 # temp .scm files
 corpus.scm
 statistics.scm
+
+outputs/
