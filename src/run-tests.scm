@@ -65,11 +65,17 @@
     
     ;; Add more test cases by adding more lists here
     ;; For example:
-    (list "another-function"
-          '(a b)
-          '((define g (lambda (x) (if ,a ,b (+ x 1)))))
-          '((g 0) (g 5))
-          '(1 6))
+    ; (list "add-1"
+    ;       '(a b)
+    ;       '((define g (lambda (x) (if ,a ,b (+ x 1)))))
+    ;       '((g 0) (g 5))
+    ;       '(1 6))
+
+    ; (list "hard-append"
+    ;       '(q r s t)
+    ;       '((define f (lambda (l s) (if ,q ,r (,s (car l) (f (cdr l) s))))))
+    ;       '((f '() '()) (f '(a) '(b)) (f '(c d) '(e f)))
+    ;       '(() (a b) (c d e f)))
   ))
 
 ;; ========== Run all test cases ==========
