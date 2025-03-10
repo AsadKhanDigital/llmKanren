@@ -9,23 +9,18 @@
   (display-separator)
   (display title)
   (display-separator))
-  
 
-;; Define a generic test runner function to run a single test case for one system
 (define (run-single-test system-name system-func logic-vars definitions test-inputs test-outputs n-values)
-  ;; If n-values is empty (for Expert system), run without n
   (if (null? n-values)
       (begin
         (display-section system-name)
         (system-func logic-vars definitions test-inputs test-outputs))
-      ;; Otherwise run for each n value
       (for-each 
         (lambda (n)
           (display-section (string-append system-name " (n=" (number->string n) ")"))
           (system-func logic-vars definitions test-inputs test-outputs n))
         n-values)))
 
-;; Define a function to run all systems for a single test case
 (define (run-test-case test-case)
   (let ((name (car test-case))
         (logic-vars (cadr test-case))
@@ -36,8 +31,8 @@
     (display-section (string-append "Test Case: " name))
     
     ; Run Expert system (no n-value)
-    ; (run-single-test "Expert" run-with-expert 
-    ;                  logic-vars definition inputs outputs '())
+    (run-single-test "Expert" run-with-expert 
+                     logic-vars definition inputs outputs '())
     
     ;; Run Zinkov system with n=2 and n=3
     (run-single-test "Zinkov" run-with-zinkov 
@@ -52,42 +47,38 @@
 (define (run-all-test-cases test-cases)
   (for-each run-test-case test-cases))
 
-;; ========== Test Case Definitions ==========
-;; Each test case is a list with the format:
-;; (name logic-vars definition inputs outputs)
-
 (define test-cases
   (list
 
-    ; (list "basic-append"
-    ;       '(q r)
-    ;       '((define f (lambda (l s) (if ,q ,r (cons (car l) (f (cdr l) s))))))
-    ;       '((f '() '()) (f '(a) '(b)) (f '(c d) '(e f)))
-    ;       '(() (a b) (c d e f)))
+    (list "basic-append"
+          '(q r)
+          '((define f (lambda (l s) (if ,q ,r (cons (car l) (f (cdr l) s))))))
+          '((f '() '()) (f '(a) '(b)) (f '(c d) '(e f)))
+          '(() (a b) (c d e f)))
     
-    ; (list "append-recursive"
-    ;       '(q r)
-    ;       '((define append (lambda (l s) (if ,q ,r (cons (car l) (append (cdr l) s))))))
-    ;       '((append '(a b c) '(d e)))
-    ;       '((a b c d e)))
+    (list "append-recursive"
+          '(q r)
+          '((define append (lambda (l s) (if ,q ,r (cons (car l) (append (cdr l) s))))))
+          '((append '(a b c) '(d e)))
+          '((a b c d e)))
 
-    ; (list "full-foldr-synthesis"
-    ;       '(body)
-    ;       '((define foldr (lambda (f acc xs) ,body)))
-    ;       '((foldr 'g2 'g1 '())
-    ;         (foldr (lambda (a d) (cons a d)) 'g3 '(g4))
-    ;         (foldr (lambda (a d) (cons a d)) 'g4 '(g5 g6))
-    ;         (foldr (lambda (v1 v2) (equal? v1 v2)) 'g7 '(g7)))
-    ;       '(g1 
-    ;         (g4 . g3) 
-    ;         (g5 g6 . g4) 
-    ;         #t))
+    (list "full-foldr-synthesis"
+          '(body)
+          '((define foldr (lambda (f acc xs) ,body)))
+          '((foldr 'g2 'g1 '())
+            (foldr (lambda (a d) (cons a d)) 'g3 '(g4))
+            (foldr (lambda (a d) (cons a d)) 'g4 '(g5 g6))
+            (foldr (lambda (v1 v2) (equal? v1 v2)) 'g7 '(g7)))
+          '(g1 
+            (g4 . g3) 
+            (g5 g6 . g4)
+            #t))
 
-    ; (list "full-append-synthesis"
-    ;       '(body)
-    ;       '((define append (lambda (l s) ,body)))
-    ;       '((append '() '()) (append '(a) '(b)) (append '(c d) '(e f)))
-    ;       '(() (a b) (c d e f)))
+    (list "full-append-synthesis"
+          '(body)
+          '((define append (lambda (l s) ,body)))
+          '((append '() '()) (append '(a) '(b)) (append '(c d) '(e f)))
+          '(() (a b) (c d e f)))
 
     ; (list "full-reverse-synthesis"
     ;       '(body)
@@ -101,7 +92,7 @@
     ;         (3 2 1)
     ;         (w z y x)))
 
-    ; (list "full-length-synthesis" ; LLM Times Out
+    ; (list "full-length-synthesis"
     ;       '(body)
     ;       '((define length (lambda (xs) ,body)))
     ;       '((length '())
@@ -141,7 +132,6 @@
     ;         (() () ())))
   ))
 
-;; ========== Run all test cases ==========
 (run-all-test-cases test-cases)
 
 (exit)
