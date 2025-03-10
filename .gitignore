@@ -22,3 +22,5 @@ corpus.scm
 statistics.scm
 
 outputs/
+
+.conda/
