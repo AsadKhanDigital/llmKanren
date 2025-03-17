@@ -10,15 +10,15 @@
   (display title)
   (display-separator))
 
-(define (run-single-test system-name system-func logic-vars definitions test-inputs test-outputs n-values)
+(define (run-single-test system-name system-func logic-vars definitions test-inputs test-outputs n-values . absento-symbols)
   (if (null? n-values)
       (begin
         (display-section system-name)
-        (system-func logic-vars definitions test-inputs test-outputs))
+        (apply system-func logic-vars definitions test-inputs test-outputs absento-symbols))
       (for-each 
         (lambda (n)
           (display-section (string-append system-name " (n=" (number->string n) ")"))
-          (system-func logic-vars definitions test-inputs test-outputs n))
+          (apply system-func logic-vars definitions test-inputs test-outputs n absento-symbols))
         n-values)))
 
 (define (run-test-case test-case)
@@ -26,21 +26,22 @@
         (logic-vars (cadr test-case))
         (definition (caddr test-case))
         (inputs (cadddr test-case))
-        (outputs (car (cddddr test-case))))
+        (outputs (car (cddddr test-case)))
+        (absento-symbols (if (> (length test-case) 5) (cdr (cddddr test-case)) '())))
     
     (display-section (string-append "Test Case: " name))
     
     ; Run Expert system (no n-value)
-    (run-single-test "Expert" run-with-expert 
-                     logic-vars definition inputs outputs '())
+    (apply run-single-test "Expert" run-with-expert 
+                     logic-vars definition inputs outputs '() absento-symbols)
     
     ;; Run Zinkov system with n=2 and n=3
-    (run-single-test "Zinkov" run-with-zinkov 
-                     logic-vars definition inputs outputs '(2 3))
+    (apply run-single-test "Zinkov" run-with-zinkov 
+                     logic-vars definition inputs outputs '(2 3) absento-symbols)
     
     ;; Run LLM system with n=2, n=3, and n=4
-    (run-single-test "LLM" run-with-llm 
-                     logic-vars definition inputs outputs '(2 3 4))
+    (apply run-single-test "LLM" run-with-llm 
+                     logic-vars definition inputs outputs '(2 3 4) absento-symbols)
     ))
 
 ;; Define a function to run all test cases
@@ -50,7 +51,7 @@
 (define test-cases
   (list
 
-    (list "basic-append"
+    (list "basic-append-no-absento"
           '(q r)
           '((define f (lambda (l s) (if ,q ,r (cons (car l) (f (cdr l) s))))))
           '((f '() '()) (f '(a) '(b)) (f '(c d) '(e f)))
@@ -60,7 +61,8 @@
           '(q r)
           '((define append (lambda (l s) (if ,q ,r (cons (car l) (append (cdr l) s))))))
           '((append '(a b c) '(d e)))
-          '((a b c d e)))
+          '((a b c d e))
+          'a 'b 'c 'd 'e)
 
     (list "full-foldr-synthesis"
           '(body)
@@ -72,40 +74,44 @@
           '(g1 
             (g4 . g3) 
             (g5 g6 . g4)
-            #t))
+            #t)
+          (gensym "g1") (gensym "g2") (gensym "g3") (gensym "g4") (gensym "g5") (gensym "g6") (gensym "g7"))
 
     (list "full-append-synthesis"
           '(body)
           '((define append (lambda (l s) ,body)))
           '((append '() '()) (append '(a) '(b)) (append '(c d) '(e f)))
-          '(() (a b) (c d e f)))
+          '(() (a b) (c d e f))
+          'a 'b 'c 'd 'e 'f)
 
-    ; (list "full-reverse-synthesis"
-    ;       '(body)
-    ;       '((define reverse (lambda (xs) ,body)))
-    ;       '((reverse '())
-    ;         (reverse '(a))
-    ;         (reverse '(1 2 3))
-    ;         (reverse '(x y z w)))
-    ;       '(() 
-    ;         (a)
-    ;         (3 2 1)
-    ;         (w z y x)))
+    (list "map-hard-0"
+         '(body)
+         '((define map (lambda (f xs) ,body)))
+         '((map 'g1 '())
+           (map (lambda (p) (car p)) '((g2 . g3)))
+           (map (lambda (p) (cdr p)) '((g4 . g5) (g6 . g7))))
+         '(() (g2) (g5 g7))
+         (gensym "g1") (gensym "g2") (gensym "g3") (gensym "g4") (gensym "g5") (gensym "g6") (gensym "g7"))
 
-    ; (list "full-length-synthesis"
-    ;       '(body)
-    ;       '((define length (lambda (xs) ,body)))
-    ;       '((length '())
-    ;         (length '(a))
-    ;         (length '(1 2 3))
-    ;         (length '(w x y z)))
-    ;       '(0 1 3 4))
+    (list "full-reverse-synthesis"
+          '(body)
+          '((define reverse (lambda (xs) ,body)))
+          '((reverse '())
+            (reverse '(a))
+            (reverse '(1 2 3))
+            (reverse '(x y z w)))
+          '(() 
+            (a)
+            (3 2 1)
+            (w z y x))
+            (gensym "g1") (gensym "g2") (gensym "g3") (gensym "g4") (gensym "g5") (gensym "g6") (gensym "g7"))
 
     ; (list "hard-append" ; Expert Times Out
     ;       '(q r s t)
     ;       '((define f (lambda (l s) (if ,q ,r (,s (car l) (f (cdr l) s))))))
     ;       '((f '() '()) (f '(a) '(b)) (f '(c d) '(e f)))
-    ;       '(() (a b) (c d e f)))
+    ;       '(() (a b) (c d e f))
+    ;       'a 'b 'c 'd 'e 'f)
 
     ; (list "full-map-synthesis" ; Extremely Hard
     ;       '(body)

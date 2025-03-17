@@ -7,7 +7,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     logic_variables, definition, test_inputs, test_outputs = sys.argv[1:5]
-    num_candidates = int(sys.argv[5]) if len(sys.argv) > 5 else 10
+    num_candidates = int(sys.argv[5]) if len(sys.argv) > 5 else 100
 
     corpus = generate_corpus(
         logic_variables,
@@ -23,7 +23,7 @@ if __name__ == "__main__":
         with open("./src/MK/corpus_zinkov_body.scm", "r") as g:
             f.write(g.read())
         f.write("\n")
-        for _ in range(100):
+        for _ in range(1):
             f.write(corpus)
         f.write("\n))")
     with open("./src/MK/corpus.scm", "r") as f: # for debugging

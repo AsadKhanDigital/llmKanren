@@ -10,7 +10,7 @@
 ;(load "src/MK/n-grams.scm")
 ;(load "src/MK/interp-simplified-dynamic.scm")
 
-(define (run-with-zinkov logic_variables definitions test_inputs test_outputs max-n)
+(define (run-with-zinkov logic_variables definitions test_inputs test_outputs max-n . absento_symbols)
 
     (system "cp src/MK/corpus_zinkov.scm src/MK/corpus.scm")
 
@@ -25,6 +25,7 @@
     
     ((query `(run 1 (prog)
                     (fresh ,logic_variables
+                      ,@(map (lambda (sym) `(absento ',sym prog)) absento_symbols)
                       (== (,'quasiquote ,(map cdr definitions))
                           prog)
                       (evalo

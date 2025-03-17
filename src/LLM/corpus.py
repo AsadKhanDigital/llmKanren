@@ -24,7 +24,7 @@ def balance_parentheses(s: str) -> str:
 def remove_trailing_newlines(s: str) -> str:
     return s.rstrip('\n')
 
-def generate_corpus(logic_variables, definition, test_inputs, test_outputs, num_candidates=10):
+def generate_corpus(logic_variables, definition, test_inputs, test_outputs, num_candidates=100):
     prompt = generate_prompt(logic_variables, definition, test_inputs, test_outputs)
     corpus = []
 

@@ -8,7 +8,7 @@
 (load "src/MK/construct-ordering.scm")
 (load "src/MK/interp-expert.scm")
 
-(define (run-with-expert lvars defns test_inputs test_outputs)
+(define (run-with-expert lvars defns test_inputs test_outputs . absento_symbols)
 
     (set! *max-n* 0)
 
@@ -16,6 +16,7 @@
 
     (letrec ((query `(run 1 (prog)
                     (fresh ,lvars
+                      ,@(map (lambda (sym) `(absento ',sym prog)) absento_symbols)
                       (== (,'quasiquote ,(map cdr defns))
                           prog)
                       (evalo
