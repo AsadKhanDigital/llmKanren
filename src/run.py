@@ -7,7 +7,10 @@ if __name__ == "__main__":
         sys.exit(1)
 
     logic_variables, definition, test_inputs, test_outputs = sys.argv[1:5]
-    num_candidates = int(sys.argv[5]) if len(sys.argv) > 5 else 100
+    num_candidates = 100
+    
+    # Output num_candidates for the log parser to pick up
+    print(f"num_candidates: {num_candidates}")
 
     corpus = generate_corpus(
         logic_variables,

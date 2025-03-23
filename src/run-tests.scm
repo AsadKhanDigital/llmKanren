@@ -31,7 +31,7 @@
     
     (display-section (string-append "Test Case: " name))
     
-    ; Run Expert system (no n-value)
+    Run Expert system (no n-value)
     (apply run-single-test "Expert" run-with-expert 
                      logic-vars definition inputs outputs '() absento-symbols)
     
@@ -75,7 +75,7 @@
             (g4 . g3) 
             (g5 g6 . g4)
             #t)
-          (gensym "g1") (gensym "g2") (gensym "g3") (gensym "g4") (gensym "g5") (gensym "g6") (gensym "g7"))
+          'g1 'g2 'g3 'g4 'g5 'g6 'g7)
 
     (list "full-append-synthesis"
           '(body)
@@ -91,20 +91,23 @@
            (map (lambda (p) (car p)) '((g2 . g3)))
            (map (lambda (p) (cdr p)) '((g4 . g5) (g6 . g7))))
          '(() (g2) (g5 g7))
-         (gensym "g1") (gensym "g2") (gensym "g3") (gensym "g4") (gensym "g5") (gensym "g6") (gensym "g7"))
+         'g1 'g2 'g3 'g4 'g5 'g6 'g7)
 
-    (list "full-reverse-synthesis"
-          '(body)
-          '((define reverse (lambda (xs) ,body)))
+    (list "reverse-synthesis"
+          '(q r s)
+          '((define reverse (lambda (xs) 
+                             (if (null? xs)
+                                 '()
+                                 (,q (reverse ,r) ,s)))))
           '((reverse '())
-            (reverse '(a))
-            (reverse '(1 2 3))
-            (reverse '(x y z w)))
+            (reverse '(g1))
+            (reverse '(g2 g3))
+            (reverse '(g4 g5 g6)))
           '(() 
-            (a)
-            (3 2 1)
-            (w z y x))
-            (gensym "g1") (gensym "g2") (gensym "g3") (gensym "g4") (gensym "g5") (gensym "g6") (gensym "g7"))
+            (g1)
+            (g3 g2)
+            (g6 g5 g4))
+          'g1 'g2 'g3 'g4 'g5 'g6 'g7)
 
     ; (list "hard-append" ; Expert Times Out
     ;       '(q r s t)
