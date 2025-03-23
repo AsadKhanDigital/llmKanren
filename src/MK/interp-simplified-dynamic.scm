@@ -1,9 +1,18 @@
-(load "prelude.scm")
+(load "src/MK/prelude.scm")
 
 ;; ngrams-statistics structure:
 ;;
 ;; (((context form) . count) ...)
-(define ngrams-statistics (read-data-from-file "tmp/statistics.scm"))
+(define ngrams-statistics (read-data-from-file "src/MK/statistics.scm"))
+
+;; keys in ngram-statistic = (cons child parent) = ngram
+;; value in n-gram-statitic = count 
+;; child  :: token
+;; {cxt = parent} :: list of tokens
+;; entry = (ngram, count) 
+(define (entry-ctx entry)   (cdar entry))
+(define (entry-child entry) (caar entry))
+(define (entry-count entry) (cdr entry))
 
 (define unique
   (lambda (l)
@@ -11,7 +20,7 @@
       '()
       (cons (car l) (remove (car l) (unique (cdr l)))))))
 
-(define all-contexts (unique (map caar ngrams-statistics)))
+(define all-contexts (unique (map entry-ctx ngrams-statistics)))
 
 ;; orderings-alist structure:
 ;;
@@ -19,8 +28,11 @@
 (define orderings-alist
   (let ((ordering-for-context
           (lambda (ctx)
-            (let ((ctx-stats (map (lambda (entry) (cons (cadar entry) (cdr entry)))
-                                  (filter (lambda (entry) (equal? ctx (caar entry))) ngrams-statistics))))
+            (let* ((filtered (filter (lambda (entry) (equal? ctx (entry-ctx entry))) ngrams-statistics))
+                   (ctx-stats (map (lambda (entry) (cons (entry-child entry) (entry-count entry)))
+                                   filtered)))
+              ;; expert-ordering-alist :: (list of (child . evalo-branch))
+
               ;; ctx-stats has the structure:
               ;;
               ;; ((form . count) ...)
@@ -37,6 +49,8 @@
            (cons ctx (ordering-for-context ctx)))
          all-contexts)))
 
+; (pretty-print orderings-alist)
+
 ; (exit)
 
 ;; context -> list of eval-relations
@@ -45,16 +59,20 @@
     (cond
       ((assoc context orderings-alist) => cdr)
       (else
-      (display "Falling back to expert ordering for context ")
-      (newline)
-      (display "Context: ")
-      (display context)
-      (newline)
-        ;(error 'eval-expo (string-append "bad context " (symbol->string context)))
+        (if (null? context)
+             (begin 
+                ; (display "Falling back to expert ordering for context ")
+                ; (newline)
+                ; (display "Context: ")
+                ; (display context)
+                (newline)
+                ;(error 'eval-expo (string-append "bad context " (symbol->string context)))
 
-        ; symbol? doesn't appear in the data, so we'll return the expert ordering
-        ; for such cases.
-        expert-ordering))))
+                ; symbol? doesn't appear in the data, so we'll return the expert ordering
+                ; for such cases.
+                expert-ordering)
+             (order-eval-relations (reverse (cdr (reverse context)))))
+                                   ))))
 
 (define eval-expo-call-count 0)
 
@@ -82,7 +100,7 @@
     ;((letrec-evalo expr env val))
     ;((match-evalo expr env val)))
 
-  (build-and-run-conde expr env val
+  (build-and-run-conde expr env val context
                        (order-eval-relations context)
                        ;expert-ordering
                        ))

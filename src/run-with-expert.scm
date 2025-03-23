@@ -1,19 +1,22 @@
 (define allow-incomplete-search? #f)
 (define lookup-optimization? #t)
 
-(load "mk-vicare.scm")
-(load "mk.scm")
-(load "interp-core.scm")
-(load "interp-app-optimization.scm")
-(load "construct-ordering.scm")
-(load "interp-expert.scm")
+(load "src/MK/mk-vicare.scm")
+(load "src/MK/mk.scm")
+(load "src/MK/interp-core.scm")
+(load "src/MK/interp-app-optimization.scm")
+(load "src/MK/construct-ordering.scm")
+(load "src/MK/interp-expert.scm")
 
-(define (run-with-expert lvars defns test_inputs test_outputs)
+(define (run-with-expert lvars defns test_inputs test_outputs . absento_symbols)
+
+    (set! *max-n* 0)
 
     (time
 
     (letrec ((query `(run 1 (prog)
                     (fresh ,lvars
+                      ,@(map (lambda (sym) `(absento ',sym prog)) absento_symbols)
                       (== (,'quasiquote ,(map cdr defns))
                           prog)
                       (evalo
@@ -21,9 +24,9 @@
                         (,'quasiquote (list . ,test_inputs)))
                       (,'quasiquote ,test_outputs))))))
         
-        (display "Orderings: ")
-        (newline)
-        (pretty-print expert-ordering-alist)
+        ; (display "Orderings: ")
+        ; (newline)
+        ; (pretty-print expert-ordering-alist)
         (newline)
         (newline)
         (display "Query:")

@@ -24,7 +24,7 @@
     ;((letrec-evalo expr env val))
     ;((match-evalo expr env val)))
 
-  (build-and-run-conde expr env val
+  (build-and-run-conde expr env val context
                        expert-ordering
                        ))
 
